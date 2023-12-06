@@ -1,47 +1,68 @@
-import java.util.List;
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+// country codes
 
 public class IRoadTrip {
 
-    private static Map<String, String> fixedCountries;
-    private static Map<String, String> countryCodes; //fill up with countries and their ID
-    private static Map<String, Map<String, Integer>> distancesMap;
-    private static Map<String, Integer> subDistancesMap;
-    private static Map<String, Map<String, Integer>> bordersMap;
-    private static Map<String, Integer> subBordersMap;
+    private Map<String, String> countryCodes;
+    private Map<String, String> correctedCountries;
+    public Graph worldMap;
 
-    public IRoadTrip (String [] args) {
+    public IRoadTrip(String[] args) {
+
         if (args.length != 3) {
             System.err.println("Usage: java IRoadTrip borders.txt capdist.csv state_name.tsv");
             System.exit(1);
         }
 
-        bordersMap = new HashMap<>();
-        distancesMap = new HashMap<>();
+        correctedCountries = createFixedCountires();
         countryCodes = new HashMap<>();
-        fixedCountries = createFixedCountires();
+        worldMap = new Graph();
 
         try {
             readCountryCodes(args[2]);
         } catch (FileNotFoundException e) {
-            System.out.println("Could not open the file " + args[2]);
-            java.lang.System.exit(1);
+            handleFileNotFound(args[2]);
         }
 
         try {
-            readDistances(args[1]);
+            generateMap(args[0]); // for reference: readBorders()
         } catch (FileNotFoundException e) {
-            System.out.println("Could not open the file " + args[1]);
-            java.lang.System.exit(1);
+            handleFileNotFound(args[0]);
         }
 
+    }
 
-        try {
-            readBorders(args[0]);
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not open the file " + args[0]);
-            java.lang.System.exit(1);
+    private void handleFileNotFound(String filename) {
+        System.out.println("Error: " + filename + "wasn't able to open.");
+        System.exit(1);
+    }
+
+    public void acceptUserInput() {
+
+        Scanner scan = new Scanner(System.in);
+
+        while (true) {
+
+            System.out.print("Enter the name if the first country (type EXIT to quit): ");
+            String country1 = scan.nextLine().trim();
+
+            if (country1.equalsIgnoreCase("EXIT")) {
+                break;
+            }
+
+            System.out.print("Enter the name if the first country (type EXIT to quit): ");
+            String country2 = scan.nextLine().trim();
+
+            if (country2.equalsIgnoreCase("EXIT")) {
+                break;
+            }
+
+            System.out.println("Route from " + country1 + " to " + country2 + ":");
         }
     }
 
@@ -102,7 +123,7 @@ public class IRoadTrip {
         // Z
         fixedCountries.put("Zambia.", "Zambia");
         fixedCountries.put("Zimbabwe (Rhodesia)", "Zimbabwe");
-        
+
         return fixedCountries;
     }
 
@@ -121,129 +142,29 @@ public class IRoadTrip {
             String countryDate = tokens[4];
 
             if (countryDate.equals("2020-12-31")) {
-                if (fixedCountries.containsKey(countryName)) {
-                    countryName = fixedCountries.get(countryName);
+                if (correctedCountries.containsKey(countryName)) {
+                    countryName = correctedCountries.get(countryName);
                     countryCodes.put(country_n_Code, countryName);
                 } else {
                     countryCodes.put(country_n_Code, countryName);
                 }
+                //System.out.println(country_n_Code + " | " + countryName + " | " + countryDate);
             }
         }
     }
 
-    public void readDistances(String filename) throws FileNotFoundException {
+    private void generateMap(String filename) throws FileNotFoundException {
 
-        File distances = new File(filename);
-        Scanner myReader = new Scanner(distances);
-
-        String header = myReader.nextLine();
-
-        while(myReader.hasNextLine()) {
-
-            String distanceData = myReader.nextLine();
-            String[] tokens = distanceData.split(",");
-            String startCountry = countryCodes.get(tokens[0]);
-            String destCountry = countryCodes.get(tokens[2]);
-            int distanceKM = -1;
-            subDistancesMap = new HashMap<>();
-
-            if (startCountry != null && destCountry != null) {
-                distanceKM = Integer.parseInt(tokens[4]);
-                if (!distancesMap.containsKey(startCountry)) {
-                    subDistancesMap.put(destCountry, distanceKM);
-                    distancesMap.put(startCountry, subDistancesMap);
-                } else {
-                    distancesMap.get(startCountry).put(destCountry, distanceKM);
-                }
-            }
-        }
     }
 
-    public void readBorders(String filename) throws FileNotFoundException {
+    public class Graph {
 
-        File borders = new File(filename);
-        Scanner myReader = new Scanner(borders); int count =0; int count2 = 0;
-
-        while (myReader.hasNextLine()) {
-
-            String countryData = myReader.nextLine();
-            String[] arrCountryData = countryData.split(" = ");
-            int distance = -1;
-            subBordersMap = new HashMap<>();
-
-            if (arrCountryData.length == 2) {
-
-                String countryName = arrCountryData[0];
-                if (fixedCountries.containsKey(countryName)) {
-                    countryName = fixedCountries.get(countryName);
-                }
-                String[] neighbors = arrCountryData[1].split(" km; | km, | km|km |; | [(]| [)]");;
-                for (String neighbor : neighbors) {
-                    String neighborName = neighbor.replaceAll("\\d| \\d|,", "");
-                    if (fixedCountries.containsKey(neighborName)) {
-                        neighborName = fixedCountries.get(neighborName);
-                    }
-                    //System.out.println(countryName + " " + neighborName);
-
-                    if (countryCodes.containsValue(countryName) && countryCodes.containsValue(neighborName)) {
-                        try {
-                            distance = distancesMap.get(countryName).get(neighborName);
-                        } catch(Exception e) {}
-                        if (!bordersMap.containsKey(countryName)) {
-                            subBordersMap.put(neighborName, distance);
-                            bordersMap.put(countryName, subBordersMap);
-                        } else {
-                            bordersMap.get(countryName).put(neighborName, distance);
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
-
-    public int getDistance (String country1, String country2) {
-        // capitals distance
-        return -1;
-    }
-
-
-    public List<String> findPath (String country1, String country2) {
-
-        return null;
-    }
-
-
-    public void acceptUserInput() {
-
-        Scanner scan = new Scanner(System.in);
-        boolean valid = true;
-        String firstCountry = "";
-        String secondCountry = "";
-
-        while(valid) {
-            System.out.print("Enter the name of the first country (type EXIT to quit): ");
-            firstCountry = scan.next();
-
-            if (firstCountry.equalsIgnoreCase("EXIT")) {
-                valid = false;
-                break;
-            }
-
-            System.out.print("Enter the name of the second country (type EXIT to quit): ");
-            secondCountry = scan.next();
-
-            if (secondCountry.equalsIgnoreCase("EXIT")) {
-                valid = false;
-                break;
-            }
-
-            System.out.println("Route from " + firstCountry + " to " + secondCountry + ":");
-            findPath(firstCountry, secondCountry);
+        public void addVertex() {
 
         }
-        scan.close();
+        public void addEdge() {
+
+        }
     }
 
 
