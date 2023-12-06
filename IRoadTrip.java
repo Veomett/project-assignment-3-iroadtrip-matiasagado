@@ -3,8 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-
-// country codes
+import static java.lang.Integer.MAX_VALUE;
 
 public class IRoadTrip {
 
@@ -31,6 +30,12 @@ public class IRoadTrip {
 
         try {
             generateMap(args[0]); // for reference: readBorders()
+        } catch (FileNotFoundException e) {
+            handleFileNotFound(args[0]);
+        }
+
+        try {
+            readDistances(args[1]); // for reference: readBorders()
         } catch (FileNotFoundException e) {
             handleFileNotFound(args[0]);
         }
@@ -154,19 +159,98 @@ public class IRoadTrip {
     }
 
     private void generateMap(String filename) throws FileNotFoundException {
+        String countryData;
+        String[] country_n_neighbors;
+        String[] neighbors = new String[0];
+        String countryName;
 
+        File borders = new File(filename);
+        Scanner myReader = new Scanner(borders);
+
+        while (myReader.hasNextLine()) {
+
+            countryData = myReader.nextLine();
+            country_n_neighbors = countryData.split(" = ", 2);
+            countryName = country_n_neighbors[0];
+            if (correctedCountries.containsKey(countryName)) {
+                countryName = correctedCountries.get(countryName);
+            }
+            worldMap.addVertex(countryName);
+            if (country_n_neighbors.length > 1) {
+                neighbors = country_n_neighbors[1].split(" km; | km|; | [(]| [)]");
+            }
+            if (neighbors.length != 0) {
+                for (String neighbor : neighbors) {
+                    String neighborName = neighbor.replaceAll("\\d| \\d|,", "");
+                    if (correctedCountries.containsKey(neighborName)) {
+                        neighborName = correctedCountries.get(neighborName);
+                    }
+                    //System.out.println(countryName + " " + neighborName);
+                    worldMap.addVertex(neighborName);
+                    worldMap.addEdge(countryName, neighborName, MAX_VALUE);
+                }
+            }
+        }
+    }
+
+    private void readDistances(String filename) throws FileNotFoundException {
+
+        File distances = new File(filename);
+        Scanner myReader = new Scanner(distances);
+        myReader.nextLine(); // skips headers
+
+        while (myReader.hasNextLine()) {
+            String distanceData = myReader.nextLine();
+            String[] tokens = distanceData.split(",");
+            String startCountry = countryCodes.get(tokens[0]);
+            String destCountry = countryCodes.get(tokens[2]);
+            int distanceKM = -1;
+            if (startCountry != null && destCountry != null) {
+                distanceKM = Integer.parseInt(tokens[4]);
+                if (worldMap.matrix.containsKey(startCountry) && worldMap.hasEdge(startCountry, destCountry)) {
+                    worldMap.replaceEdge(startCountry,destCountry,distanceKM);
+                }
+            }
+
+        }
     }
 
     public class Graph {
 
-        public void addVertex() {
+        private Map<String, Map<String, Integer>> matrix = new HashMap<>(); // reference: bordersMap
 
+        public void addVertex(String country) {
+            if (! matrix.containsKey(country))
+                matrix.put(country, new HashMap<>());
         }
-        public void addEdge() {
+        public void addEdge(String start, String destination, int distance) {
+            matrix.get(start).put(destination, distance);
+            matrix.get(destination).put(start, distance);
+        }
 
+        public boolean hasEdge(String start, String destination) {
+            return ( matrix.containsKey(start) && matrix.get(start).containsKey(destination) );
+        }
+
+        public void replaceEdge(String start, String destination, int distance) {
+            matrix.get(start).replace(destination, distance);
+            matrix.get(destination).replace(start, distance);
         }
     }
 
+    public static class Node implements Comparable<Node>{
+        String country;
+        Integer distance;
+        Node(String c, Integer d){
+            country = c;
+            distance = d;
+        }
+        @Override
+        public int compareTo(Node n1)
+        {
+            return this.distance - n1.distance;
+        }
+    }
 
     public static void main(String[] args) {
         IRoadTrip a3 = new IRoadTrip(args);
