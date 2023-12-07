@@ -45,7 +45,7 @@ public class IRoadTrip {
     public void acceptUserInput() {
         Scanner scan = new Scanner(System.in);
         while (true) {
-            System.out.print("Enter the name if the first country (type EXIT to quit): ");
+            System.out.print("Enter the name of the first country (type EXIT to quit): ");
             String country1 = scan.nextLine().trim();
             if (country1.equalsIgnoreCase("EXIT")) {
                 break;
@@ -54,7 +54,7 @@ public class IRoadTrip {
                 System.out.println("Invalid country name. Please enter a valid country name.");
                 continue;
             }
-            System.out.print("Enter the name if the second country (type EXIT to quit): ");
+            System.out.print("Enter the name of the second country (type EXIT to quit): ");
             String country2 = scan.nextLine().trim();
             if (country2.equalsIgnoreCase("EXIT")) {
                 break;
@@ -72,7 +72,7 @@ public class IRoadTrip {
                     System.out.println(string);
                 }
             }
-            //System.out.println( getDistance(country1, country2) ); // works 10/10
+            System.out.println( getDistance(country1, country2) ); // works 10/10
         }
     }
 
