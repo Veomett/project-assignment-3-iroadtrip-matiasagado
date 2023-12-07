@@ -4,8 +4,8 @@
 - Overview
 - How It Works
 - Classes and Components
-- Usage
 - Configuration
+- Features
 - Results
 - Acknowledgements
 
@@ -14,12 +14,13 @@
 IRoadTrip is a Java-based program designed to find the shortest path between two countries based on their borders and distances. This tool leverages input files containing information about countries, their borders, and distances to create a graph. Users can then input two country names, and the program calculates and displays the optimal route along with corresponding distances.
 
 # How It Works
+
 1. Graph Creation: Reads input files to generate a graph representing countries and their neighboring relationships.
 2. User Input: Accepts user input for two country names.
 3. Pathfinding Algorithm: Utilizes Dijkstra's algorithm to find the shortest path between the specified countries.
 4. Results Display: Presents the route and distances to the user.
 
-## Classes and Components
+# Classes and Components
 
 #### IRoadTrip
 
@@ -39,7 +40,7 @@ A class representing a country node in the graph.
   
 - Country Node: Represents a country in the graph, including information about its distance and the previous country in the path.
 
-## Configuration
+# Configuration
 To run the program, execute the following command in the terminal:
 
     java IRoadTrip borders.txt capdist.csv state_name.tsv
@@ -48,7 +49,7 @@ To run the program, execute the following command in the terminal:
 - capdist.csv: File containing distances between countries.
 - state_name.tsv: File containing country codes and names.
   
-## Features
+# Features
 
 #### Fixing Country Names
 
@@ -67,7 +68,7 @@ To run the program, execute the following command in the terminal:
 - The program utilizes Dijkstra's algorithm to find the shortest path between two countries.
 - The algorithm processes nodes in the graph, updating distances and paths as it explores the graph.
 
-## Results
+# Results
 
 findPath:
 
@@ -88,7 +89,7 @@ Route from Canada to Chile:
 * Colombia --> Peru (1880 km.)
 * Peru --> Chile (2425 km.)
 
-## Acknowledgments
+# Acknowledgments
 
 This program was developed with inspiration from educational sources:
 
