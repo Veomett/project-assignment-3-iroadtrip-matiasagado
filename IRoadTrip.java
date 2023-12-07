@@ -72,7 +72,7 @@ public class IRoadTrip {
                     System.out.println(string);
                 }
             }
-            System.out.println( getDistance(country1, country2) ); // works 10/10
+            //System.out.println( getDistance(country1, country2) ); // works 10/10
         }
     }
 
