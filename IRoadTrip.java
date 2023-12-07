@@ -76,6 +76,7 @@ public class IRoadTrip {
         }
     }
 
+
     // Creates a map for fixing country name discrepancies
     private Map<String, String> createFixedCountires() {
         Map<String, String> fixedCountries = new HashMap<String, String>();
