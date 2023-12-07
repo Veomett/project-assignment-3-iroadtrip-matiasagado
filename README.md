@@ -1,4 +1,4 @@
-# iroadtrip-matiasagado
+# CS 245 (Fall 2023) - Assignment 3 - IRoadTrip
 
 # Table of Contents
 - Overview
